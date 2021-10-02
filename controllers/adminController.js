@@ -10,8 +10,8 @@ const gateway = new braintree.BraintreeGateway({
   environment: braintree.Environment.Sandbox,
   merchantId: process.env.BRAINTREE_MERCHANT_ID,
   publicKey: process.env.BRAINTREE_PUBLIC_KEY,
-  privateKey: process.env.BRAINTREE_PRIVATE_KEY
-})
+  privateKey: process.env.BRAINTREE_PRIVATE_KEY,
+});
 
 exports.getUsers = async (req, res) => {
   console.log('Inside GET USERS');
@@ -397,18 +397,18 @@ exports.createMembershipRecord = async (req, res) => {
         userName: 'Telmo Sampaio',
         userEmail: 'telmoasampaio@gmail.com',
         customerId: '476293276',
-        paidThrough: new Date(2020,10,17),
-        firstBillDate: new Date(2020,09,18),
+        paidThrough: new Date(2020, 10, 17),
+        firstBillDate: new Date(2020, 09, 18),
         status: 'Active',
         subscriptionId: '5wvgdg',
         transactionId: 'gsgn6r2f',
         price: 14.99,
       });
     }
-    console.log("Created new record")
+    console.log('Created new record');
     res.status(200).json({
-      status: 'success'
-    })
+      status: 'success',
+    });
   } catch (error) {
     console.log(error);
   }
@@ -417,46 +417,50 @@ exports.createMembershipRecord = async (req, res) => {
 exports.getMemberships = async (req, res) => {
   try {
     const memberships = await Membership.find();
-    console.log("this is membership")
+    // console.log('this is membership');
     // console.log(memberships);
 
     const allMemberships = [...memberships];
     let needsUpdate = [];
     const fetchBillInfo = async (bills) => {
-      
       const requests = bills.map((bill, i) => {
-  
         return new Promise((resolve, reject) => {
-          gateway.subscription.find(bill.subscriptionId, async function (err, result) {
-            console.log("This is membership")
-            // console.log(result)
-            // console.log(result)
-  
-            // const findTransaction = await Membership.find({transactionId: result.transactions[0].id});
-            // console.log("findTransaction is:");
-            // console.log(findTransaction);
+          gateway.subscription.find(
+            bill.subscriptionId,
+            async function (err, result) {
+              // console.log("This is membership")
+              // console.log(result)
+              // console.log(result)
 
-            const resPayThroughDate = new Date(result.paidThroughDate);
-            const billPaidThrough = new Date(bill.paidThrough);
+              // const findTransaction = await Membership.find({transactionId: result.transactions[0].id});
+              // console.log("findTransaction is:");
+              // console.log(findTransaction);
 
-            // console.log(resPayThroughDate);
-            // console.log(billPaidThrough);
-            // console.log(resPayThroughDate - billPaidThrough)
-            console.log("NUMBERS:")
-            console.log(result.transactions.length);
-            console.log(bill.transactions);
+              const resPayThroughDate = new Date(result.paidThroughDate);
+              const billPaidThrough = new Date(bill.paidThrough);
 
-            if((result.status !== bill.status) || (resPayThroughDate - billPaidThrough) !== 0 || (result.transactions.length !== bill.transactions) ) {
-              bill.paidThrough = result.paidThroughDate;
-              bill.status = result.status
-              bill.transactions = result.transactions.length
-              needsUpdate.push(true);
-              console.log("updating....")
-            }
+              // console.log(resPayThroughDate);
+              // console.log(billPaidThrough);
+              // console.log(resPayThroughDate - billPaidThrough)
+              console.log('NUMBERS:');
+              console.log(result.transactions.length);
+              console.log(bill.transactions);
 
-            // console.log("This is bill");
-            // console.log(bill)
-  
+              if (
+                result.status !== bill.status ||
+                resPayThroughDate - billPaidThrough !== 0 ||
+                result.transactions.length !== bill.transactions
+              ) {
+                bill.paidThrough = result.paidThroughDate;
+                bill.status = result.status;
+                bill.transactions = result.transactions.length;
+                needsUpdate.push(true);
+                console.log('updating....');
+              }
+
+              // console.log("This is bill");
+              // console.log(bill)
+
               // if(findTransaction.length < 1) {
               //   const newTransaction = await Transaction.create({
               //     date: new Date( result.transactions[i].createdAt),
@@ -470,74 +474,72 @@ exports.getMemberships = async (req, res) => {
               //     transactionId: result.transactions[i].id,
               //   });
               // }
-  
-            
-  
-            // if (!err && ((bill.status != result.status) || (bill.paidThroughDate != result.paidThroughDate))) {
-            //   bill.status = result.status;
-            //   bill.firstBillingDate = result.firstBillingDate
-            //   bill.paidThroughDate = result.paidThroughDate
-            // }
-            resolve(bill);
-          });
+
+              // if (!err && ((bill.status != result.status) || (bill.paidThroughDate != result.paidThroughDate))) {
+              //   bill.status = result.status;
+              //   bill.firstBillingDate = result.firstBillingDate
+              //   bill.paidThroughDate = result.paidThroughDate
+              // }
+              resolve(bill);
+            }
+          );
         });
-      })
-      return Promise.all(requests) // Waiting for all the requests to get resolved.
-    }
+      });
+      return Promise.all(requests); // Waiting for all the requests to get resolved.
+    };
 
     fetchBillInfo(allMemberships)
-    .then(async (membershipsToUpdate) => {
+      .then(async (membershipsToUpdate) => {
+        // const areNotEqual = initialBill.find((obj, i) => {
+        //   // console.log(checkSame(obj, billingUpdated[i]));
+        //   return !checkSame(obj, billingUpdated[i]);
+        // })
 
-      // const areNotEqual = initialBill.find((obj, i) => {
-      //   // console.log(checkSame(obj, billingUpdated[i]));
-      //   return !checkSame(obj, billingUpdated[i]);
-      // })
+        // if (areNotEqual) {
+        //   console.log("There are changes please update");
+        //   user.billingHistory = billingUpdated;
+        //   await user.save({ validateBeforeSave: false });
+        // } else {
+        //   console.log("they are all the same");
+        // }
+        console.log('Needs to update is');
+        console.log(needsUpdate);
+        if (needsUpdate.length > 0) {
+          const bulkUpdateOps = membershipsToUpdate.map((membership, i) => {
+            return {
+              updateOne: {
+                filter: { _id: membership._id },
+                update: {
+                  $set: {
+                    status: membership.status,
+                    paidThrough: new Date(membership.paidThrough),
+                    transactions: membership.transactions,
+                  },
+                },
+              },
+            };
+          });
+          console.log('bulkUpdateOps');
+          console.log(membershipsToUpdate);
 
-      // if (areNotEqual) {
-      //   console.log("There are changes please update");
-      //   user.billingHistory = billingUpdated;
-      //   await user.save({ validateBeforeSave: false });
-      // } else {
-      //   console.log("they are all the same");
-      // }
-      console.log("Needs to update is");
-      console.log(needsUpdate)
-      if(needsUpdate.length > 0) {
-        const bulkUpdateOps = membershipsToUpdate.map((membership, i) => {
-          return {
-            updateOne: {
-              "filter": { "_id": membership._id },
-              "update": {
-                $set: {
-                  status: membership.status,
-                  paidThrough: new Date(membership.paidThrough),
-                  transactions: membership.transactions
-                }
-              }
-            }
-          }
-        });
-        console.log("bulkUpdateOps");
-        console.log(membershipsToUpdate)
+          await Membership.bulkWrite(bulkUpdateOps, { ordered: true, w: 1 });
+          console.log('JUST UPDATED....');
+        } else {
+          console.log('No need for update....');
+        }
 
-        await Membership.bulkWrite(bulkUpdateOps, { "ordered": true, "w": 1 });
-        console.log("JUST UPDATED....");
-      } else {
-        console.log("No need for update....")
-      }
-
-      console.log("The memberships are updated")
-      // console.log(billingUpdated)
-    }).catch((error) => {
-      console.log("There was an error find the membership history")
-      console.log(error)
-    });
-
+        console.log('The memberships are updated');
+        // console.log(billingUpdated)
+      })
+      .catch((error) => {
+        console.log('There was an error find the membership history');
+        console.log(error);
+      });
 
     res.status(200).json({
-      memberships: allMemberships
-    })
+      memberships: allMemberships,
+    });
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
-}
+};

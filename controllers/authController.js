@@ -5,6 +5,7 @@ const User = require('../models/userModel');
 const Transactions = require('../models/transactionModel');
 const fs = require('fs');
 const { upload } = require('../utils/imageUpload');
+const { userImage } = require('./digitalOceanSpaces');
 const axios = require('axios');
 
 const Email = require('../utils/email');
@@ -74,24 +75,20 @@ exports.register = async (req, res) => {
 
     const response = await axios.post(verificationUrl);
 
-    console.log("The google verification is:");
+    console.log('The google verification is:');
     console.log(response.data);
 
-  
-      // Destructure body object
-      // Check the reCAPTCHA v3 documentation for more information
-      const { success, score } = response.data;
-    
+    // Destructure body object
+    // Check the reCAPTCHA v3 documentation for more information
+    const { success, score } = response.data;
 
-      // reCAPTCHA validation
-      if (!success || score < 0.4) {
-       
-        throw new Error("Register failed. Robots aren't allowed here. " + score);
-      }
-      // When no problems occur, "send" the form
-      console.log('Congrats you sent the form');
-      // Return feedback to user with msg
-    
+    // reCAPTCHA validation
+    if (!success || score < 0.4) {
+      throw new Error("Register failed. Robots aren't allowed here. " + score);
+    }
+    // When no problems occur, "send" the form
+    console.log('Congrats you sent the form');
+    // Return feedback to user with msg
 
     // 2) Check if user exists && password is correct
     const user = await User.findOne({ email });
@@ -175,11 +172,11 @@ exports.login = async (req, res, next) => {
   try {
     const { email, password, token } = req.body;
 
-    if (!token) {
-      throw new Error(
-        'There was a problem with your request. Please try again later.'
-      );
-    }
+    // if (!token) {
+    //   throw new Error(
+    //     'There was a problem with your request. Please try again later.'
+    //   );
+    // }
 
     const secretKey = process.env.RECAPTCHA_SECRET_KEY;
 
@@ -187,7 +184,7 @@ exports.login = async (req, res, next) => {
 
     const response = await axios.post(verificationUrl);
 
-    console.log("The google verification is:");
+    console.log('The google verification is:');
     console.log(response.data);
 
     // Destructure body object
@@ -195,14 +192,9 @@ exports.login = async (req, res, next) => {
     const { success, score } = response.data;
 
     // reCAPTCHA validation
-    if (!success || score < 0.4) {
-      // return res.json({
-      //   status: 'fail',
-      //   message: "Sending failed. Robots aren't allowed here.",
-      //   score: score,
-      // });
-      throw new Error("Login failed. Robots aren't allowed here. " + score);
-    }
+    // if (!success || score < 0.4) {
+    //   throw new Error("Login failed. Robots aren't allowed here. " + score);
+    // }
 
     console.log('Inside Login Controller');
     // 1) Check if email and password exist
@@ -263,8 +255,8 @@ exports.protect = async (req, res, next) => {
     console.log(token);
     // 2) Verification token
     const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-    console.log('Decoded is');
-    console.log(decoded);
+    // console.log('Decoded is');
+    // console.log(decoded);
 
     // 3) Check if user still exists
     const currentUser = await User.findById(decoded.id);
@@ -281,7 +273,7 @@ exports.protect = async (req, res, next) => {
 
     req.user = currentUser;
     req.token = token;
-    console.log('before protect next');
+    // console.log('before protect next');
     next();
   } catch (error) {
     console.log('error in login');
@@ -484,8 +476,9 @@ exports.profilePic = async (req, res) => {
     //   }
     // })
 
-    console.log('this is files');
-    console.log(req.file);
+    // console.log('this is files');
+    // console.log(req.file);
+
     // console.log(req.files);
 
     // const file = req.files.file;

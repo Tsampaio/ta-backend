@@ -729,15 +729,15 @@ exports.checkMembership = async (req, res) => {
         gateway.subscription.find(
           bill.subscriptionId,
           async function (err, result) {
-            console.log('This is membership');
+            // console.log('This is membership');
             // console.log(result)
 
             for (let i = 0; i < result.transactions.length; i++) {
               const findTransaction = await Transaction.find({
                 transactionId: result.transactions[i].id,
               });
-              console.log('findTransaction is:');
-              console.log(findTransaction);
+              // console.log('findTransaction is:');
+              // console.log(findTransaction);
 
               if (findTransaction.length < 1) {
                 const newTransaction = await Transaction.create({
